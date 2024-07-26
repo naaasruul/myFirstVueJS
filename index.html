@@ -5,9 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="bootstrap/css/bootstrap.min.css">
     <link rel="stylesheet" href="style.css">
-    <script src="jquery/jquery.min.js"></script>
     <script src="vue/vue.global.min.js"></script>
     <script src="vue/vue-router.global.min.js"></script>
+
     <script type="module" src="main.js"></script>
     <title>Find A Match Website</title>
     <div id="app">
@@ -18,4 +18,17 @@
 <body>
     
 </body>
+<script src="jquery/jquery.min.js"></script>
+<script>
+    $(function(){
+        $('.main-card').on('click',function(){
+            console.log(this)
+            const isFlipped = $(this).find('.card-front').is(':visible');
+            if(isFlipped){
+                $(this).find('.card-front').fadeOut(0)
+                $(this).find('.card-front').fadeIn(1000)
+            }
+        })
+    })
+</script>
 </html>

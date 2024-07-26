@@ -21,12 +21,12 @@ export default {
         <div class="col-9" >
         <div class="row">
 
-        <div class="col-4" v-for="(card,index) in cards" :key="index" @click="flipCard(index)" >
-        <div class="card mb-3" :class={'matched':card.matched} v-if="card.flipped || card.matched" >
-        <img :src="returnFilePath(card.val)">
+        <div class="col-4 main-card" v-for="(card,index) in cards" :key="index" @click="flipCard(index)" >
+        <div class="card mb-3 card-front" :class="{'matched':card.matched}" v-if="card.flipped || card.matched" >
+        <img class='img-fluid' :src="returnFilePath(card.val)" >
         </div>
-        <div class="card-back bg-light p-5 card mb-3 text-center"v-if="!card.flipped && !card.matched">
-        <h3>?</h3>
+        <div class=" bg-light p-5 card mb-3 text-center card-back" v-if="!card.flipped && !card.matched">
+        <h1>?</h1>
         </div>
         </div>
         
@@ -61,10 +61,12 @@ export default {
           pause: false,
           userTimeRank: null,
           userMoveRank: null,
+          name:''
         };
     },
     methods: {
         goToHome(){
+            localStorage.removeItem('gameState')
             this.$router.push('/')
         },
         returnFilePath(name){
@@ -99,14 +101,15 @@ export default {
         },
 
         restart(){
+            localStorage.removeItem('gameState')
             this.stopTimer();
             this.mode = this.$route.params.mode;
             if (this.mode != "easy") {
               this.total = 12;
-              this.cards = [
-                0, 0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8, 8, 9, 9, 10,
-                10,
-              ];
+              this.cards = [0, 0, 1, 1, 2, 2];
+            //   this.cards = [
+            //     0, 0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8, 8, 9, 9,
+            //   ];
             } else {
               this.total = 6;
               this.cards = [0, 0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5];
@@ -138,6 +141,21 @@ export default {
 
             return `${m}:${s}`
         },
+
+        saveState(){
+            let gameState = {
+              mode: this.mode,
+              move: this.move,
+              match: this.match,
+              // cards:[0,0,1,1,2,2,3,3,4,4,5,5],
+              total: this.total,
+              cards: this.cards,
+              flipIndices: this.flipIndices,
+              timer: this.timer,
+            };
+
+            localStorage.setItem('gameState',JSON.stringify(gameState))
+        },   
 
         submitPressed(){
             var keyTimer = `timescore_${this.mode}`;
@@ -187,6 +205,7 @@ export default {
                     this.flipIndices = []
                     this.match++
                     this.move++
+                    this.saveState()
                 }else{
                     // if not matched
                     this.move++
@@ -196,10 +215,12 @@ export default {
                         this.cards[this.flipIndices[1]].flipped = false
                         this.flipIndices = []
                     },1000)
+                    this.saveState()
                 }
             }
 
             if(this.cards.every(card => card.matched)){
+                localStorage.removeItem('gameState')
                 this.gameOver = true
                 this.stopTimer()
 
@@ -243,10 +264,25 @@ export default {
         }
     },
     mounted() {
-        this.mode = this.$route.params.mode
+        var gameState = JSON.parse(localStorage.getItem('gameState'))
+        if(gameState){
+            this.mode = gameState['mode']
+              this.move = gameState['move']
+              this.match = gameState['match']
+              this.total = gameState['total']
+              this.cards = gameState['cards']
+              this.flipIndices = gameState['flipIndices']
+              this.timer = gameState['timer']
+
+              this.pause = true
+              alert('Game is paused!')
+              this.pause = false
+        }else{
+            this.mode = this.$route.params.mode
         if(this.mode != 'easy'){
             this.total = 12
-            this.cards=[0,0,1,1,2,2,3,3,4,4,5,5,6,6,7,7,8,8,9,9,10,10]
+            this.cards = [0, 0, 1, 1, 2, 2];
+            // this.cards=[0,0,1,1,2,2,3,3,4,4,5,5,6,6,7,7,8,8,9,9,10,10]
         }
         this.cards = this.shuffleCard(
             this.cards.map((val) => ({
@@ -256,5 +292,7 @@ export default {
             }))
         );
         console.log('after random:',this.cards)
+        }
+        
     },
 }

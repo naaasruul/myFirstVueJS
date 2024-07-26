@@ -23,4 +23,10 @@ export default {
             this.$router.push('/leaderboards/easy')
         }
     },
+    mounted() {
+        let gameState = JSON.parse(localStorage.getItem('gameState'))
+        if(gameState){
+            this.$router.push(`/game/${gameState['mode']}`)
+        }
+    },
 }
